@@ -3,6 +3,6 @@ import { importHospitalData } from "../controllers/hospital.controller.js";
 
 const router = express.Router();
 
-router.post("/", importHospitalData);
+router.get("/", importHospitalData);
 
 export default router;
