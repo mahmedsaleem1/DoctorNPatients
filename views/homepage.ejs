@@ -1,0 +1,229 @@
+<%- include('navbar') %>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DoctorsUp - Health Website</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f9f9f9;
+            color: #4a4a4a;
+            margin: 0;
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            text-align: center;
+            padding: 100px 20px;
+            background: url('./doctor.jpg') center/cover no-repeat;
+            color: white;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        /* Services Section */
+        .services {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .service-card {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .service-card h3 {
+            margin: 15px 0;
+            color: #2c7a7b;
+            font-weight: 500;
+        }
+
+        /* About Section */
+        .about {
+            text-align: center;
+            padding: 60px 20px;
+            background: #e8f5e9;
+        }
+
+        .about h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #2c7a7b;
+        }
+
+        .about p {
+            max-width: 800px;
+            margin: auto;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            text-align: center;
+            padding: 60px 20px;
+            background: #f0f8ff;
+            margin-top: 40px;
+        }
+
+        .testimonials h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #2c7a7b;
+        }
+
+        .testimonial-card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            max-width: 600px;
+        }
+
+        .testimonial-card h4 {
+            color: #2c7a7b;
+            margin-top: 10px;
+        }
+
+        /* Health Tips Section */
+        .health-tips {
+            padding: 50px 20px;
+            background: #e8f5e9;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .health-tips h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #2c7a7b;
+        }
+
+        .health-tips ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .health-tips li {
+            font-size: 1.1rem;
+            padding: 10px;
+            margin: 5px 0;
+            background: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            width: 80%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Doctors-Up: Redefining Healthcare</h1>
+            <p>Connecting you with the best medical professionals and herbal specialists.</p>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services">
+        <div class="service-card">
+            <h3>Herbal Treatments</h3>
+            <p>Discover natural and organic treatments for a healthier lifestyle.</p>
+        </div>
+        <div class="service-card">
+            <h3>Specialist Consultations</h3>
+            <p>Book expert doctors and herbal specialists at your convenience.</p>
+        </div>
+        <div class="service-card">
+            <h3>Holistic Health Plans</h3>
+            <p>Get personalized health plans combining modern and herbal medicine.</p>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about">
+        <h2>About Us</h2>
+        <p>Doctors-Up is a platform that bridges the gap between modern medicine and herbal wellness, ensuring holistic and accessible healthcare for everyone.</p>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <h2>What Our Patients Say</h2>
+        <div class="testimonial-card">
+            <p>"Doctors-Up helped me find the best herbal treatment for my chronic migraines. Highly recommend!"</p>
+            <h4>- Sarah J.</h4>
+        </div>
+        <div class="testimonial-card">
+            <p>"The specialist consultation feature made it so easy to book an appointment. Amazing service!"</p>
+            <h4>- Michael R.</h4>
+        </div>
+        <div class="testimonial-card">
+            <p>"A perfect blend of modern and herbal healthcare. I've never felt better!"</p>
+            <h4>- Emily L.</h4>
+        </div>
+    </section>
+
+    <!-- Health Tips Section -->
+    <section class="health-tips">
+        <h2>Daily Health Tips</h2>
+        <ul>
+            <li>Stay hydrated by drinking at least 8 glasses of water daily.</li>
+            <li>Incorporate fresh fruits and vegetables into your meals for a balanced diet.</li>
+            <li>Practice mindfulness and meditation to reduce stress.</li>
+            <li>Regular exercise helps maintain a healthy body and mind.</li>
+            <li>Quality sleep is essential—aim for at least 7-8 hours per night.</li>
+        </ul>
+    </section>
+
+    <!-- Footer -->
+    <%- include('footer') %>
+
+</body>
+</html>

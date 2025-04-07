@@ -1,0 +1,74 @@
+<%- include('navbar') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Leave a Review</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-green-50 min-h-screen p-8">
+  <div class="max-w-md mx-auto bg-white p-6 rounded shadow">
+    <h2 class="text-2xl font-bold mb-4 text-green-700">Leave a Review</h2>
+    <form id="reviewForm">
+      <div class="mb-4">
+        <label class="block font-medium mb-1">Rating (1-5):</label>
+        <input type="number" id="rating" min="1" max="5" required class="w-full border px-3 py-2 rounded" />
+      </div>
+      <div class="mb-4">
+        <label class="block font-medium mb-1">Comment:</label>
+        <textarea id="comment" rows="4" required class="w-full border px-3 py-2 rounded"></textarea>
+      </div>
+      <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Submit Review</button>
+    </form>
+    <p id="msg" class="mt-4 text-center text-sm text-red-500"></p>
+  </div>
+
+  <script>
+    const form = document.getElementById("reviewForm");
+    const msg = document.getElementById("msg");
+    const appointmentId = "<%= appointmentId %>"; // passed from route
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const rating = parseInt(document.getElementById("rating").value, 10);  // Ensure rating is an integer
+      const comment = document.getElementById("comment").value;
+
+      if (isNaN(rating) || rating < 1 || rating > 5) {
+        msg.innerText = "Please provide a rating between 1 and 5.";
+        msg.classList.add("text-red-500");
+        msg.classList.remove("text-green-600");
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:8000/api/v1/review/create/${appointmentId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: "include",
+          body: JSON.stringify({ rating, comment })
+        });
+
+        const result = await res.json();
+        if (res.ok && result.success) {
+            msg.innerText = "Review submitted successfully!";
+            msg.classList.remove("text-red-500");
+            msg.classList.add("text-green-600");
+            form.reset(); // Reset the form after success
+            } else {
+            msg.innerText = result.message || "Submission failed!";
+            msg.classList.remove("text-green-600");
+            msg.classList.add("text-red-500");
+            }
+      } catch (err) {
+        console.error(err);
+        msg.innerText = "Something went wrong! Please try again.";
+        msg.classList.remove("text-green-600");
+        msg.classList.add("text-red-500");
+      }
+    });
+  </script>
+  <% include('footer') %>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<%- include('navbar') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctors List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-green-50 text-gray-800">
+    <div class="max-w-6xl mx-auto p-6">
+        <h2 class="text-3xl font-bold text-green-700 text-center mb-6">Find Your Doctor</h2>
+
+        <!-- Search & Filter Section -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 space-y-4 md:space-y-0">
+            <div class="flex space-x-2 w-full md:w-1/2">
+                <input type="text" id="searchBox" placeholder="Search doctor by name..." 
+                       class="border border-green-500 px-4 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-green-400">
+                <button onclick="applyFilters()" 
+                        class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                    Search
+                </button>
+            </div>
+
+            <!-- Filter Options -->
+            <div class="flex space-x-2">
+                <select id="filterSpecialty" 
+                        class="border border-green-500 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400">
+                    <option value="">Specialty</option>
+                </select>
+
+                <select id="filterFee" 
+                        class="border border-green-500 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400">
+                    <option value="">Fee</option>
+                    <option value="lowest">Lowest Fee</option>
+                    <option value="highest">Highest Fee</option>
+                </select>
+                <select id="filterAvailability" 
+                        class="border border-green-500 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400">
+                    <option value="">Availability</option>
+                    <option value="Available">Available</option>
+                    <option value="Not Available">Not Available</option>
+                </select>
+
+                <button onclick="applyFilters()" 
+                        class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                    Apply Filters
+                </button>
+            </div>
+        </div>
+
+        <!-- Doctor Cards -->
+        <div id="doctorList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <!-- Doctors will be dynamically inserted here -->
+        </div>
+
+        <!-- No Results Message -->
+        <p id="noResults" class="text-center text-red-500 text-lg mt-4 hidden">No doctors found.</p>
+
+        <!-- Pagination -->
+        <div class="mt-6 flex justify-center items-center space-x-4" id="pagination"></div>
+    </div>
+
+    <script>
+        let doctors = []; 
+        let filteredDoctors = [];
+        let currentPage = 1;
+        const perPage = 6;
+
+        const allSpecialties = [
+            "Cardiologist", "Dermatologist", "Endocrinologist", "Gastroenterologist",
+            "Neurologist", "Oncologist", "Orthopedic Surgeon", "Pediatrician",
+            "Psychiatrist", "Pulmonologist", "Radiologist", "Rheumatologist",
+            "Urologist", "General Physician", "Gynecologist", "Nephrologist",
+            "Ophthalmologist", "ENT Specialist", "Dentist", "Plastic Surgeon"
+        ];
+
+        async function fetchDoctors() {
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/doctor/get/all-doctors');
+                const data = await response.json();
+
+                if (data.success) {
+                    doctors = data.data;
+                    filteredDoctors = doctors; 
+                    populateSpecialties();
+                    renderDoctors();
+                    renderPagination();
+                } else {
+                    console.error("Failed to fetch doctors");
+                }
+            } catch (error) {
+                console.error("Error fetching doctors:", error);
+            }
+        }
+
+        function populateSpecialties() {
+            let specialtyDropdown = document.getElementById('filterSpecialty');
+
+            allSpecialties.forEach(specialty => {
+                let option = document.createElement('option');
+                option.value = specialty;
+                option.innerText = specialty;
+                specialtyDropdown.appendChild(option);
+            });
+        }
+
+        async function checkAuthPatient() {
+            try {
+                let response = await fetch('http://localhost:8000/api/v1/patient/getCurrentPatient', {
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    return true; // Patient is authenticated
+                } else {
+                    return false; // Patient is not authenticated
+                }
+            } catch (error) {
+                console.error("Error checking authentication:", error);
+                return false; // In case of an error
+            }
+        }
+
+        async function handleDoctorClick(doctorId) {
+            const isAuthenticated = await checkAuthPatient();
+            
+            if (isAuthenticated) {
+                window.location.href = `/doctor/${doctorId}`; // Change to your doctor details route
+            } else {
+                alert("You must be logged in as a Patient to view doctor details.");
+                window.location.href = '/patientlogin'; 
+            }
+        }
+
+        function renderDoctors() {
+            let doctorList = document.getElementById('doctorList');
+            let noResults = document.getElementById('noResults');
+            doctorList.innerHTML = '';
+
+            if (filteredDoctors.length === 0) {
+                noResults.classList.remove('hidden');
+                return;
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            let start = (currentPage - 1) * perPage;
+            let end = start + perPage;
+            let paginatedDoctors = filteredDoctors.slice(start, end);
+
+            paginatedDoctors.forEach(doctor => {
+                let card = document.createElement('div');
+                card.className = "bg-white shadow-lg rounded-lg p-4 text-center hover:bg-green-100 transition";
+
+                let isAvailable = doctor.availability_status !== 'null' && doctor.availability_status.trim() !== "";
+
+                card.innerHTML = `
+                    <img src="${doctor.profile_picture || './defaultDoc.jpg'}" 
+                         class="w-24 h-24 mx-auto rounded-full border-2 border-green-500">
+                    <h3 class="text-lg font-semibold mt-2">${doctor.full_name}</h3>
+                    <p class="text-sm text-gray-600">${doctor.email}</p>
+                    <p class="text-green-700 font-semibold mt-1">
+                        Specialty: ${doctor.specialty !== 'null' ? doctor.specialty : 'Not Provided'}
+                    </p>
+                    <p class="text-sm">Qualification: ${doctor.qualification !== 'null' ? doctor.qualification : 'Not Provided'}</p>
+                    <p class="text-sm">Experience: ${doctor.experience_years} years</p>
+                    <p class="text-sm font-bold text-green-600">Fee: ${doctor.consultation_fee} PKR</p>
+                    <p class="text-sm font-semibold ${isAvailable ? 'text-green-700' : 'text-red-500'}">
+                        ${isAvailable ? "Available" : "Not Available"}
+                    </p>
+                `;
+
+                if (isAvailable) {
+                    // Add the "Book Appointment" button for available doctors
+                    let bookButton = document.createElement('button');
+                    bookButton.className = 'bg-green-500 text-white px-4 py-2 mt-4 rounded-md hover:bg-green-600';
+                    bookButton.innerText = 'Book Appointment And See Reviews';
+                    bookButton.onclick = function () {
+                        handleBookAppointment(doctor.doctor_id);
+                    };
+                    card.appendChild(bookButton);
+                }
+
+                doctorList.appendChild(card);
+            });
+        }
+
+        async function handleBookAppointment(doctorId) {
+            const isAuthenticated = await checkAuthPatient();
+            
+            if (isAuthenticated) {
+                window.location.href = `/doctor/${doctorId}`; // Redirect to booking page
+            } else {
+                alert("You must be logged in as a Patient to book an appointment.");
+                window.location.href = '/patientlogin'; // Redirect to login page if not authenticated
+            }
+        }
+
+        function applyFilters() {
+            let specialty = document.getElementById('filterSpecialty').value;
+            let fee = document.getElementById('filterFee').value;
+            let availability = document.getElementById('filterAvailability').value;
+            let searchQuery = document.getElementById('searchBox').value.toLowerCase().trim();
+
+            filteredDoctors = doctors.filter(doctor => {
+                let matchesSpecialty = specialty ? doctor.specialty === specialty : true;
+                let matchesSearch = searchQuery ? doctor.full_name.toLowerCase().includes(searchQuery) : true;
+
+                let isAvailable = doctor.availability_status !== 'null' && doctor.availability_status.trim() !== "";
+                let matchesAvailability = availability === "Available" ? isAvailable :
+                                          availability === "Not Available" ? !isAvailable : true;
+
+                return matchesSpecialty && matchesSearch && matchesAvailability;
+            });
+
+            if (fee === "lowest") {
+                filteredDoctors.sort((a, b) => a.consultation_fee - b.consultation_fee);
+            } else if (fee === "highest") {
+                filteredDoctors.sort((a, b) => b.consultation_fee - a.consultation_fee);
+            }
+
+            currentPage = 1;
+            renderDoctors();
+            renderPagination();
+        }
+
+        function renderPagination() {
+            let pagination = document.getElementById('pagination');
+            let totalPages = Math.ceil(filteredDoctors.length / perPage);
+            pagination.innerHTML = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                let pageButton = document.createElement('button');
+                pageButton.innerText = i;
+                pageButton.className = 'px-4 py-2 mx-1 bg-green-500 text-white rounded-md hover:bg-green-600';
+                pageButton.onclick = () => {
+                    currentPage = i;
+                    renderDoctors();
+                    renderPagination();
+                };
+                pagination.appendChild(pageButton);
+            }
+        }
+
+        window.onload = fetchDoctors;
+    </script>
+</body>
+</html>

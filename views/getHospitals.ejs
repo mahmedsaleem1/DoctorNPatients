@@ -1,0 +1,149 @@
+<%- include('navbar') %>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Listings</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            background-color: #f4f9f4; 
+            margin: 0; 
+            padding: 0; 
+            text-align: center;
+        }
+        .container { 
+            width: 90%; 
+            margin: 20px auto; 
+        }
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+            gap: 20px;
+            justify-content: center;
+        }
+        .card { 
+            background: #fff; 
+            border-radius: 12px; 
+            padding: 15px; 
+            box-shadow: 0px 4px 8px rgba(0, 128, 0, 0.2);
+            border-left: 5px solid #66bb6a;
+            transition: 0.3s; 
+            cursor: pointer; 
+        }
+        .card:hover { 
+            transform: scale(1.03);
+            box-shadow: 0px 6px 12px rgba(0, 100, 0, 0.3);
+        }
+        .hidden-card { 
+            display: none; 
+            padding: 10px; 
+            background: #e8f5e9; 
+            margin-top: 10px;
+            border-radius: 8px; 
+            border-left: 4px solid #43a047;
+        }
+        h3 { 
+            color: #2e7d32; 
+            margin: 0;
+        }
+        .pagination { 
+            margin-top: 20px; 
+        }
+        .page-btn { 
+            padding: 10px 15px; 
+            margin: 5px; 
+            border: none; 
+            background-color: #66bb6a; 
+            color: white; 
+            border-radius: 5px; 
+            cursor: pointer;
+        }
+        .page-btn:disabled { 
+            background-color: #a5d6a7; 
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 style="color:#1b5e20;">🌿 Hospital Listings</h2>
+        <div id="hospital-list" class="grid"></div>
+        
+        <div class="pagination">
+            <button id="prev" class="page-btn">Prev</button>
+            <span id="page-num"></span>
+            <button id="next" class="page-btn">Next</button>
+        </div>
+    </div>
+
+    <script>
+        let hospitals = [];
+        let perPage = 40;
+        let currentPage = 1;
+
+        async function fetchHospitals() {
+            try {
+                let response = await fetch("http://localhost:8000/api/v1/hospital/");
+                let data = await response.json();
+                hospitals = data.data || []; // Ensure it's an array
+                renderPage(currentPage);
+            } catch (error) {
+                console.error("Error fetching hospital data:", error);
+            }
+        }
+
+        function renderPage(page) {
+            $("#hospital-list").empty();
+            let start = (page - 1) * perPage;
+            let end = start + perPage;
+            let paginatedData = hospitals.slice(start, end);
+
+            paginatedData.forEach((hospital, index) => {
+                $("#hospital-list").append(`
+                    <div class="card" onclick="toggleDetails(${index})">
+                        <h3>${hospital["HOSPITAL NAME"]}</h3>
+                        <p><strong>City:</strong> ${hospital.CITY}</p>
+                        <p><strong>Doctors Available:</strong> ${hospital.DOCTORS}</p>
+                        <div id="details-${index}" class="hidden-card">
+                            <p><strong>Area:</strong> ${hospital.AREA || "N/A"}</p>
+                            <p><strong>Address:</strong> ${hospital.ADDRESS}</p>
+                            <p><strong>Contact:</strong> ${hospital.CONTACT}</p>
+                        </div>
+                    </div>
+                `);
+            });
+
+            $("#page-num").text(`Page ${page} of ${Math.ceil(hospitals.length / perPage)}`);
+            $("#prev").prop("disabled", page === 1);
+            $("#next").prop("disabled", page === Math.ceil(hospitals.length / perPage));
+        }
+
+        function toggleDetails(index) {
+            $(`#details-${index}`).toggle();
+        }
+
+        $("#prev").click(() => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPage(currentPage);
+            }
+        });
+
+        $("#next").click(() => {
+            if (currentPage < Math.ceil(hospitals.length / perPage)) {
+                currentPage++;
+                renderPage(currentPage);
+            }
+        });
+
+        fetchHospitals(); // Call API on page load
+    </script>
+        <%- include('footer') %>
+
+</body>
+</html>

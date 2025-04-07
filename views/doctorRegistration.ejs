@@ -1,0 +1,82 @@
+<%- include('navbar') %>
+<html>
+<head>
+    <title>Doctor Registration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-3xl">
+        <h1 class="text-2xl font-bold mb-6">Doctor Registration</h1>
+        <form action="/api/v1/doctor/register" method="POST" enctype="multipart/form-data">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-center border border-gray-300 rounded-lg p-2">
+                    <i class="fas fa-user text-gray-400 mr-2"></i>
+                    <input type="text" name="fullname" placeholder="Full Name" class="w-full outline-none">
+                </div>
+                <div class="flex items-center border border-gray-300 rounded-lg p-2">
+                    <textarea name="about" placeholder="Your Introduction" class="w-full outline-none resize-none"></textarea>
+                </div>
+                <div class="flex items-center border border-gray-300 rounded-lg p-2">
+                    <i class="fas fa-graduation-cap text-gray-400 mr-2"></i>
+                    <input type="text" name="qualification" placeholder="Qualifications" class="w-full outline-none">
+                </div>
+                <div class="flex items-center border border-gray-300 rounded-lg p-2">
+                    <i class="fas fa-stethoscope text-gray-400 mr-2"></i>
+                    <input type="text" name="specialty" placeholder="Specialty" class="w-full outline-none">
+                </div>
+                <div class="flex items-center border border-gray-300 rounded-lg p-2">
+                    <i class="fas fa-envelope text-gray-400 mr-2"></i>
+                    <input type="email" name="email" placeholder="Email" class="w-full outline-none">
+                </div>
+                <div class="flex items-center border border-gray-300 rounded-lg p-2">
+                    <i class="fas fa-briefcase text-gray-400 mr-2"></i>
+                    <input type="text" name="experience" placeholder="Experience (i.e 8 years)" class="w-full outline-none">
+                </div>
+                <div class="flex items-center border border-gray-300 rounded-lg p-2">
+                    <i class="fas fa-lock text-gray-400 mr-2"></i>
+                    <input type="password" name="password" placeholder="Password" class="w-full outline-none">
+                </div>
+                <div class="flex items-center justify-center">
+                    <h3 class="text-lg font-semibold text-gray-700">Profile Picture</h3>
+                    <input type="file" name="profile_picture" class="w-full outline-none">
+                </div>
+                <div class="flex items-center justify-center">
+                    <h3 class="text-lg font-semibold text-gray-700">Video Introduction</h3>
+                    <input type="file" name="video_intro" class="w-full outline-none">
+                </div>
+            </div>
+            <h2 class="text-lg font-bold mt-6 mb-4">Appointment Details</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-center border border-gray-300 rounded-lg p-2">
+                    <i class="fas fa-calendar-alt text-gray-400 mr-2"></i>
+                    <input type="text" name="availability" placeholder="Appointment Days (Monday, Wednesday, ...)" class="w-full outline-none">
+                </div>
+                <div class="flex items-center border border-gray-300 rounded-lg p-2">
+                    <i class="fas fa-clock text-gray-400 mr-2"></i>
+                    <input type="text" name="availability_time" placeholder="Appointment Timing(3:00 PM-7:00 PM)" class="w-full outline-none">
+                </div>
+                <div class="flex items-center border border-gray-300 rounded-lg p-2">
+                    <i class="fas fa-dollar-sign text-gray-400 mr-2"></i>
+                    <input type="text" name="fee" placeholder="Appointment Fees (1000)" class="w-full outline-none">
+                </div>
+            </div>
+            <div class="flex justify-center mt-6">
+                <button type="submit" class="bg-green-500 text-white py-2 px-6 rounded-lg">Register</button>
+            </div>
+            <br>
+            <div class="flex justify-center mt-4">
+                <!-- Use an anchor link styled as a button -->
+                <a href="/auth/doctor/google" class="bg-red-100 text-red-500 py-2 px-6 rounded-lg flex items-center justify-center">
+                    <i class="fab fa-google mr-2"></i> Continue with Google
+                </a>
+            </div>
+            <div class="text-center mt-6">
+                <p class="text-sm text-gray-600">Already a Doctor? <a href="/doctorlogin" class="text-green-500 hover:underline">Sign In</a></p>
+            </div>
+        </form>
+    </div>
+    <%- include('footer') %>
+
+</body>
+</html>

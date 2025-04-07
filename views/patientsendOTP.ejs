@@ -1,0 +1,89 @@
+<%- include('navbar') %>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send OTP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f1f8f0; /* Soft herbal background */
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            max-width: 500px;
+            padding-top: 50px;
+        }
+        h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2d6a4f; /* Herbal green */
+            text-align: center;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #3a5a40; /* Darker green for label text */
+        }
+        .form-control {
+            border: 2px solid #78c2ad; /* Light green border */
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .form-control:focus {
+            border-color: #2d6a4f; /* Focused border becomes herbal green */
+            box-shadow: 0 0 5px rgba(45, 106, 79, 0.5); /* Light herbal glow effect */
+        }
+        .btn-primary {
+            background-color: #2d6a4f; /* Herbal green background */
+            border-color: #2d6a4f;
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+        }
+        .btn-primary:hover {
+            background-color: #1b4c35; /* Darker herbal green on hover */
+        }
+        .btn-primary:focus {
+            outline: none;
+            box-shadow: 0 0 5px rgba(45, 106, 79, 0.5); /* Focus effect */
+        }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #3a5a40;
+        }
+        .footer a {
+            color: #2d6a4f;
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Send OTP</h2>
+        <form action="/api/v1/patient/send-otp" method="POST">
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Send OTP</button>
+        </form>
+        <div class="footer">
+            <p>Remember to check your inbox or spam folder for the OTP.</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <%- include('footer') %>
+
+</body>
+</html>

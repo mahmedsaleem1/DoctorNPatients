@@ -1,0 +1,127 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Update Doctor Info</title>
+  <style>
+    body {
+      background-color: #f4fff4;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 30px;
+      color: #2d572c;
+    }
+
+    h2 {
+      text-align: center;
+      color: #1e4620;
+    }
+
+    form {
+      max-width: 600px;
+      margin: auto;
+      background-color: #e8f5e9;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0, 100, 0, 0.1);
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #a5d6a7;
+      border-radius: 8px;
+      background-color: #ffffff;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      margin-top: 20px;
+      width: 100%;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #388e3c;
+    }
+  </style>
+</head>
+<body>
+    <%- include('navbar') %>
+
+  <h2>Update Your Profile</h2>
+  <form id="doctorForm">
+    <label>Full Name:</label>
+    <input type="text" name="full_name">
+
+    <label>Specialty:</label>
+    <input type="text" name="specialty" placeholder="e.g. Herbal Medicine, Ayurveda">
+
+    <label>Qualification:</label>
+    <input type="text" name="qualification">
+
+    <label>Experience (Years):</label>
+    <input type="number" name="experience_years">
+
+    <label>About:</label>
+    <textarea name="about" rows="4"></textarea>
+
+    <label>Availability Status:</label>
+    <select name="availability_status">
+      <option value="available">Available</option>
+      <option value="unavailable">Unavailable</option>
+    </select>
+
+    <label>Consultation Fee:</label>
+    <input type="number" name="consultation_fee">
+
+    <button type="submit">Update Info</button>
+  </form>
+
+  <script>
+    const form = document.getElementById('doctorForm');
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const rawData = Object.fromEntries(formData.entries());
+
+      const data = {
+        ...rawData,
+        experience_years: rawData.experience_years ? Number(rawData.experience_years) : undefined,
+        consultation_fee: rawData.consultation_fee ? Number(rawData.consultation_fee) : undefined
+      };
+
+      const res = await fetch("/api/v1/doctor/updateDoctorInfo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        alert(result.message || "Updated Successfully!");
+        window.location.href = "/";
+      } else {
+        alert(result.message || "Failed to update info.");
+      }
+    });
+  </script>
+  <%- include('footer') %>
+
+</body>
+</html>

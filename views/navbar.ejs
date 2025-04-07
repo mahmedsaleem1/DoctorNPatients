@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DoctorsUp - Health Website</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        .nav-link {
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        .auth-card {
+            transition: transform 0.3s;
+        }
+        .auth-card:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Navbar -->
+    <nav class="bg-green-600 p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="text-white text-2xl font-bold">DoctorsUp</div>
+
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex space-x-4">
+                <a href="/" class="nav-link text-white px-4 py-2 rounded">Home</a>
+                <a href="/search-doctors" class="nav-link text-white px-4 py-2 rounded">Search Doctors</a>
+                <a href="/hospitals" class="nav-link text-white px-4 py-2 rounded">Hospitals</a>
+                <a href="/disease-diagnoser" class="nav-link text-white px-4 py-2 rounded">Disease Diagnoser</a>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button id="menu-button" class="text-white focus:outline-none" onclick="toggleMenu()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Authentication Options -->
+            <div id="auth-options-container" class="auth-options flex items-center relative"></div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="flex flex-col space-y-2 mt-2">
+                <a href="/" class="nav-link block text-white hover:bg-green-700 px-3 py-2 rounded">Home</a>
+                <a href="/search-doctors" class="nav-link block text-white hover:bg-green-700 px-3 py-2 rounded">Search Doctors</a>
+                <a href="/hospitals" class="nav-link block text-white hover:bg-green-700 px-3 py-2 rounded">Hospitals</a>
+                <a href="/disease-diagnoser" class="nav-link block text-white hover:bg-green-700 px-3 py-2 rounded">Disease Diagnoser</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login/Signup Dropdown (Only Visible when User is Not Authenticated) -->
+    <div id="auth-options" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg hidden z-10">
+        <div class="p-2">
+            <h3 class="text-center font-bold">Doctor Options</h3>
+            <a href="/doctorlogin" class="auth-card block text-green-500 hover:bg-gray-200 px-3 py-2 rounded">Login</a>
+            <a href="/doctorregister" class="auth-card block text-green-500 hover:bg-gray-200 px-3 py-2 rounded">Register</a>
+        </div>
+        <div class="border-t border-gray-300"></div>
+        <div class="p-2">
+            <h3 class="text-center font-bold">Patient Options</h3>
+            <a href="/patientlogin" class="auth-card block text-green-500 hover:bg-gray-200 px-3 py-2 rounded">Login</a>
+            <a href="/patientregister" class="auth-card block text-green-500 hover:bg-gray-200 px-3 py-2 rounded">Register</a>
+        </div>
+    </div>
+
+    <script>
+        // Toggle Mobile Menu
+        function toggleMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        // Fetch Authentication Status for Doctor or Patient
+        async function checkAuthDoc() {
+            try {
+                // Check Doctor Login
+                let response = await fetch('http://localhost:8000/api/v1/doctor/getCurrentDoctor', {
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();             
+                    showAuthenticatedUser(data.data, 'doctor');
+                    
+                    return;
+                }
+
+                // Show Login/Register Options if Not Logged In
+                showAuthButtons();
+
+            } catch (error) {
+                showAuthButtons();
+            }
+        }
+
+        async function checkAuthPatient() {
+            try {
+                let response = await fetch('http://localhost:8000/api/v1/patient/getCurrentPatient', {
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();      
+                    
+                    showAuthenticatedUser(data.data, 'patient');
+                    return;
+                }
+
+                // Show Login/Register Options if Not Logged In
+                showAuthButtons();
+
+            } catch (error) {
+                showAuthButtons();
+            }
+        }
+
+        // Show Authenticated User Menu
+        function showAuthenticatedUser(data, role) {
+            
+            document.getElementById('auth-options-container').innerHTML = `
+                <div class="relative">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-white font-bold">Welcome, ${data.full_name}</span>
+                        <img src="${data.profile_picture || './defaultDoc.jpg'}" 
+                            alt="Profile" 
+                            class="w-10 h-10 rounded-full cursor-pointer border-2 border-white" 
+                            onclick="toggleSidebar()">
+                    </div>
+                    <!-- Sidebar -->
+                    <div id="profile-sidebar" class="absolute right-0 top-12 w-48 bg-white rounded-lg shadow-lg hidden z-10">
+                        <div class="p-2">
+                            <h3 class="text-center font-bold">${data.full_name}</h3>
+                            <a href="/${role}/dashboard" class="block text-green-500 hover:bg-gray-200 px-3 py-2 rounded">Dashboard</a>
+                            <a href="/${role}/settings" class="block text-green-500 hover:bg-gray-200 px-3 py-2 rounded">Settings</a>
+                            <button onclick="logout${role}()" class="block w-full text-left text-red-500 hover:bg-gray-200 px-3 py-2 rounded">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Toggle Sidebar
+        function toggleSidebar() {
+            document.getElementById('profile-sidebar').classList.toggle('hidden');
+        }
+
+        // Close Sidebar when clicking outside
+        document.addEventListener("click", function(event) {
+            const sidebar = document.getElementById('profile-sidebar');
+            if (sidebar && !event.target.closest('.relative')) {
+                sidebar.classList.add('hidden');
+            }
+        });
+        // Show Login/Register Buttons for Non-Authenticated Users
+        function showAuthButtons() {
+            document.getElementById('auth-options-container').innerHTML = `
+                <div class="relative">
+                    <button onclick="toggleAuthOptions()" class="text-white hover:bg-green-700 px-4 py-2 rounded">Login/ Register</button>
+                    <div id="auth-options" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg hidden z-10">
+                        <div class="p-2">
+                            <h3 class="text-center font-bold">Doctor Options</h3>
+                            <a href="/doctorlogin" class="auth-card block text-green-500 hover:bg-gray-200 px-3 py-2 rounded">Login</a>
+                            <a href="/doctorregister" class="auth-card block text-green-500 hover:bg-gray-200 px-3 py-2 rounded">Register</a>
+                        </div>
+                        <div class="border-t border-gray-300"></div>
+                        <div class="p-2">
+                            <h3 class="text-center font-bold">Patient Options</h3>
+                            <a href="/patientlogin" class="auth-card block text-green-500 hover:bg-gray-200 px-3 py-2 rounded">Login</a>
+                            <a href="/patientregister" class="auth-card block text-green-500 hover:bg-gray-200 px-3 py-2 rounded">Register</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Logout Function
+        async function logoutdoctor() {
+            try {
+                await fetch('http://localhost:8000/api/v1/doctor/logout', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                window.location.href = '/'; // Redirect to home after logout
+            } catch (error) {
+                console.error("Logout failed", error);
+            }
+        }
+
+        async function logoutpatient() {
+            try {
+                await fetch('http://localhost:8000/api/v1/patient/logout', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                window.location.href = '/'; // Redirect to home after logout
+            } catch (error) {
+                console.error("Logout failed", error);
+            }
+        }
+
+        // Toggle Authentication Dropdown
+        function toggleAuthOptions() {
+            document.getElementById('auth-options').classList.toggle('hidden');
+        }
+
+        // Close Auth Options if Clicked Outside
+        document.addEventListener("click", function(event) {
+            const authOptions = document.getElementById('auth-options');
+            if (authOptions && !event.target.closest('.relative')) {
+                authOptions.classList.add('hidden');
+            }
+        });
+
+        // Load Authentication Status on Page Load
+        checkAuthPatient();
+        checkAuthDoc();
+    </script>
+
+</body>
+</html>

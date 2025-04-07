@@ -1,0 +1,123 @@
+<%- include('navbar')%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Appointments</title>
+  <script>
+    async function getDoctorName(id) {
+      try {
+        let res = await fetch(`http://localhost:8000/api/v1/doctor/get/${id}`);
+        let data = await res.json();
+        return data?.data?.full_name || "Unknown";
+      } catch (err) {
+        return "Error";
+      }
+    }
+
+    async function checkReviewExists(appointmentId) {
+      try {
+        console.log(`Checking review existence for appointment ID: ${appointmentId}`);
+        
+        let res = await fetch(`http://localhost:8000/api/v1/review/exists/${appointmentId}`);
+        let data = await res.json();
+        return data.success; // Assuming your API returns { success: true } if the review exists
+      } catch (err) {
+        console.error("Error checking review existence", err);
+        return false;
+      }
+    }
+
+    async function fetchAppointments() {
+      try {
+        let res = await fetch("http://localhost:8000/api/v1/appointment/patient", {
+          credentials: "include"
+        });
+        let data = await res.json();
+
+        if (data.success) {
+          let tbody = document.getElementById("appointments-body");
+          tbody.innerHTML = "";
+
+          for (let [index, appt] of data.message.entries()) {
+            let actionBtn = "";
+
+            // Check if a review already exists
+            let reviewExists = await checkReviewExists(appt.appointment_id);
+
+            if (reviewExists) {
+              actionBtn = `<button class="px-3 py-1 rounded bg-gray-500 text-white cursor-not-allowed" disabled>Review Given</button>`;
+            } else if (appt.status === "completed") {
+              actionBtn = `<button onclick="giveReview('${appt.appointment_id}')" class="px-3 py-1 rounded bg-blue-500 hover:bg-blue-600 text-white">Review</button>`;
+            } else if (appt.status === "pending") {
+              actionBtn = `<button onclick="cancelAppointment('${appt.appointment_id}')" class="px-3 py-1 rounded bg-red-500 hover:bg-red-600 text-white">Cancel</button>`;
+            }
+
+            let row = `<tr class="border" id="row-${index}">
+              <td class="px-4 py-2">${index + 1}</td>
+              <td class="px-4 py-2">${new Date(appt.appointment_date).toDateString()}</td>
+              <td class="px-4 py-2">${new Date(appt.appointment_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'UTC' })}</td>
+              <td class="px-4 py-2">${appt.status}</td>
+              <td class="px-4 py-2">${appt.payment_status}</td>
+              <td class="px-4 py-2" id="doctor-${index}">Loading...</td>
+              <td class="px-4 py-2">${actionBtn}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+
+            let name = await getDoctorName(appt.doctor_id);
+            document.getElementById(`doctor-${index}`).innerText = name;
+          }
+        } else {
+          document.getElementById("msg").innerText = "Please login to view your appointments.";
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById("msg").innerText = "Something went wrong!";
+      }
+    }
+
+    function giveReview(id) {
+      window.location.href = `review/create/${id}`;
+    }
+
+    async function cancelAppointment(id) {
+      if (!confirm("Are you sure you want to cancel this appointment?")) return;
+
+      try {
+        let res = await fetch(`http://localhost:8000/api/v1/appointment/cancel/${id}`, {
+          method: "DELETE",
+          credentials: "include"
+        });
+        let data = await res.json();
+        alert(data.message || "Cancelled!");
+        fetchAppointments(); // reload
+      } catch (err) {
+        console.error(err);
+        alert("Failed to cancel!");
+      }
+    }
+
+    window.onload = fetchAppointments;
+  </script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-6">
+  <h1 class="text-2xl font-bold mb-4">My Appointments</h1>
+  <p id="msg" class="text-red-500 mb-4"></p>
+  <table class="min-w-full bg-white shadow-md rounded">
+    <thead class="bg-green-500 text-white">
+      <tr>
+        <th class="px-4 py-2">#</th>
+        <th class="px-4 py-2">Date</th>
+        <th class="px-4 py-2">Time</th>
+        <th class="px-4 py-2">Status</th>
+        <th class="px-4 py-2">Payment</th>
+        <th class="px-4 py-2">Doctor</th>
+        <th class="px-4 py-2">Action</th>
+      </tr>
+    </thead>
+    <tbody id="appointments-body"></tbody>
+  </table>
+  <% include('footer')%>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<%- include('navbar') %>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor AI Chat</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Body and general styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f9f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Navbar styling */
+        nav {
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #2e7d32;
+            padding: 10px 0;
+            color: white;
+            text-align: center;
+            z-index: 1000; /* Keep navbar on top */
+            display: flex;
+            justify-content: space-between; /* Align user login to right */
+            padding: 10px 20px;
+        }
+
+        .navbar-user {
+            position: relative;
+            align-self: center; /* Ensure it stays vertically centered */
+        }
+
+        /* Chat container */
+        .chat-container {
+            width: 400px;
+            max-width: 90%;
+            background: #ffffff;
+            box-shadow: 0px 4px 10px rgba(0, 128, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            margin-top: 70px; /* Add margin to avoid overlap with navbar */
+            padding: 10px;
+        }
+
+        .chat-header {
+            background: #2e7d32;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            max-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            line-height: 1.4;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: #81c784;
+            color: white;
+        }
+
+        .doctor-message {
+            align-self: flex-start;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #43a047;
+        }
+
+        .input-box {
+            display: flex;
+            padding: 10px;
+            background: #f1f8f1;
+            border-top: 1px solid #c8e6c9;
+        }
+
+        .input-box input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #c8e6c9;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .input-box button {
+            background: #43a047;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-left: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .input-box button:disabled {
+            background: #a5d6a7;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">🌿 Chat with your Personal Doctor</div>
+        <div class="chat-box" id="chat-box">
+            <div class="message doctor-message">Hello! I am Doctor AI. Ask me about your symptoms.</div>
+        </div>
+        <div class="input-box">
+            <input type="text" id="user-input" placeholder="Type your question...">
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function appendMessage(sender, text) {
+            let messageClass = sender === "user" ? "user-message" : "doctor-message";
+            $("#chat-box").append(`<div class="message ${messageClass}">${text}</div>`);
+            $(".chat-box").scrollTop($(".chat-box")[0].scrollHeight);
+        }
+
+        async function sendMessage() {
+            let inputField = $("#user-input");
+            let message = inputField.val().trim();
+            if (!message) return;
+            
+            appendMessage("user", message);
+            inputField.val("");
+            $("#send-btn").prop("disabled", true);
+
+            try {
+                let response = await fetch("http://localhost:8000/api/v1/diagnoser", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message })
+                });
+                let data = await response.json();
+                appendMessage("doctor", data.data || "I couldn't understand your question.");
+            } catch (error) {
+                appendMessage("doctor", "⚠️ Error fetching response. Please try again.");
+                console.error("Error:", error);
+            }
+            
+            $("#send-btn").prop("disabled", false);
+        }
+
+        $("#send-btn").click(sendMessage);
+        $("#user-input").keypress((e) => {
+            if (e.which === 13) sendMessage();
+        });
+    </script>
+    <%- include('footer') %>
+
+</body>
+</html>
