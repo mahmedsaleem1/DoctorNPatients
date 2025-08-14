@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "db:init": "node src/models/initDB.models.js",
-    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js"
+    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
